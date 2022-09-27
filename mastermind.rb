@@ -47,32 +47,52 @@ class CodeBreaker
     print "codemaker provides feedback by placing from zero to four key pegs. A colored or #{bold('BLACK')} "
     print "key peg is placed for each code peg from the guess which is correct in both"
     puts " color and position. A #{bold('WHITE')} key peg indicates the existence of a correct color code peg placed in the wrong position."
-    get_turns
+    get_guess(10)
     get_code
     check_guess
   end
 
   def get_code
-    @code = []
+    @codes = []
     for i in (1..4) do
       case rand(1..6)
       when 1
-        @code << RED
+        @codes << RED
       when 2
-        @code << GREEN
+        @codes << GREEN
       when 3
-        @code << YELLOW
+        @codes << YELLOW
       when 4
-        @code << BLUE
+        @codes << BLUE
       when 5
-        @code << PINK
+        @codes << PINK
       when 6
-        @code << WHITE
+        @codes << WHITE
       end
     end
-    puts @code
+    puts @codes
   end
 
+  def check_guess
+    arr1 = @codes
+    arr2 = @guesses
+    arr1.each_with_index do |val,indx|
+      if arr1[indx] == arr2[indx]
+        puts B
+        arr1.delete_at(indx)
+        arr2.delete_at(indx)
+      end
+    end
+    arr1.each do |val1|
+      arr2.each do |val2|
+        if val1 == val2
+          puts W
+          arr1.delete(val1)
+          arr2.delete(val2)
+        end
+      end
+    end
+  end
 
   def get_turns
     puts "Enter the number of turns you would like to guess the code (The number should be even and greater than eight and less than twelve)"
@@ -118,8 +138,8 @@ class CodeBreaker
     @guesses.each do |guess|
       print "#{guess} "
     end
-    confirm = gets.chomp
-    unless confirm == 'y'
+    confirm = gets.chomp.downcase
+    unless confirm == 'y' || confirm == ''
       get_guess(turns)
     end
 
