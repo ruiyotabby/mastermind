@@ -39,6 +39,8 @@ class CodeBreaker
     display
   end
 
+  private
+
   def display
     print "\nThe codebreaker tries to guess the pattern of the colors, in both order and color, within eight to twelve turns. "
     print "Each guess is made by placing a row of code pegs on the decoding board. Once placed, the "
@@ -46,14 +48,17 @@ class CodeBreaker
     print "key peg is placed for each code peg from the guess which is correct in both"
     puts " color and position. A #{bold('WHITE')} key peg indicates the existence of a correct color code peg placed in the wrong position."
     get_turns
+    get_code
+    check_guess
   end
+
 
   def get_turns
     puts "Enter the number of turns you would like to guess the code (The number should be even and greater than eight and less than twelve)"
-    turns = gets
-    if turns.to_i % 2  == 0 && turns.to_i >= 8 && turns.to_i <= 12
-      puts "#{turns.chomp} turns it is."
-      get_guess(turns)
+    @turns = gets
+    if @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
+      puts "#{@turns.chomp} turns it is."
+      get_guess(@turns)
     else
       puts 'Please try again'
       get_turns
@@ -62,40 +67,41 @@ class CodeBreaker
 
   def get_guess(turns)
     print "The colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
-    puts ' Type your guesses (e.g. "R" or "r" for red color)'
-    guesses = []
+    puts ' Type your guesses, pick the first letter of each color (e.g. "R" or "r" for red color)'
+    @guesses = []
     colors = ['r','g','y','w','p','b']
 
-    while guesses.length < 4
+    while @guesses.length < 4
         print "Enter one color guess then press enter: "
         input = gets
         if colors.include?(input.chomp.downcase)
-          guesses << input.chomp
+          case input.chomp.downcase
+          when 'r'
+            @guesses << RED
+          when 'g'
+            @guesses << GREEN
+          when 'y'
+            @guesses << YELLOW
+          when 'w'
+            @guesses << WHITE
+          when 'p'
+            @guesses << PINK
+          when 'b'
+            @guesses << BLUE
+          end
         else
           puts 'Please try again'
         end
     end
     print 'Is this your choice of colors(enter "y" or "n"): '
-    guesses.each do |guess|
-      case guess
-      when 'r'
-        print "#{RED} "
-      when 'g'
-        print "#{GREEN} "
-      when 'y'
-        print "#{YELLOW} "
-      when 'w'
-        print "#{WHITE} "
-      when 'p'
-        print "#{PINK} "
-      when 'b'
-        print "#{BLUE} "
-      end
+    @guesses.each do |guess|
+      print "#{guess} "
     end
     confirm = gets.chomp
     unless confirm == 'y'
       get_guess(turns)
     end
+
   end
 
   def get_input
@@ -135,4 +141,4 @@ class Game
 
 end
 
-CodeBreaker.new.display
+CodeBreaker.new.start
