@@ -52,6 +52,27 @@ class CodeBreaker
     check_guess
   end
 
+  def get_code
+    @code = []
+    for i in (1..4) do
+      case rand(1..6)
+      when 1
+        @code << RED
+      when 2
+        @code << GREEN
+      when 3
+        @code << YELLOW
+      when 4
+        @code << BLUE
+      when 5
+        @code << PINK
+      when 6
+        @code << WHITE
+      end
+    end
+    puts @code
+  end
+
 
   def get_turns
     puts "Enter the number of turns you would like to guess the code (The number should be even and greater than eight and less than twelve)"
