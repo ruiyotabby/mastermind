@@ -36,6 +36,7 @@ class CodeBreaker
   include Colors
 
   def start
+    get_codes
     display
   end
 
@@ -47,12 +48,12 @@ class CodeBreaker
     print "codemaker provides feedback by placing from zero to four key pegs. A colored or #{bold('BLACK')} "
     print "key peg is placed for each code peg from the guess which is correct in both"
     puts " color and position. A #{bold('WHITE')} key peg indicates the existence of a correct color code peg placed in the wrong position."
-    get_guess(10)
-    get_code
-    check_guess
+
+    get_turns
+
   end
 
-  def get_code
+  def get_codes
     @codes = []
     for i in (1..4) do
       case rand(1..6)
@@ -70,28 +71,35 @@ class CodeBreaker
         @codes << WHITE
       end
     end
-    puts @codes
+    if @codes.uniq.length < 4
+      get_codes
+    end
   end
 
   def check_guess
-    arr1 = @codes
-    arr2 = @guesses
-    arr1.each_with_index do |val,indx|
-      if arr1[indx] == arr2[indx]
-        puts B
-        arr1.delete_at(indx)
-        arr2.delete_at(indx)
-      end
-    end
-    arr1.each do |val1|
-      arr2.each do |val2|
-        if val1 == val2
-          puts W
-          arr1.delete(val1)
-          arr2.delete(val2)
+    puts @codes
+    @blacks = []
+    arr1 = {}
+    @codes.each { |a| arr1.store(a,'') }
+    arr2 = Hash.new
+    @guesses.each { |a| arr2.store(a,'') }
+    print "\n\t"
+    arr1.each_with_index do |(key1,val1),indx1|
+      unless arr1[val1] == true || arr2[val1] == true
+        if arr1.keys.index(key1) == arr2.keys.index(key1)
+          print "#{B} "
+          arr1[key1] = true
+          arr2[key1] = true
+          @blacks << B
+        elsif arr1[key1] == arr2[key1]
+          print "#{W} "
+          arr1[key1] = true
+          arr2[key1] = true
         end
       end
+
     end
+    puts ''
   end
 
   def get_turns
@@ -99,7 +107,7 @@ class CodeBreaker
     @turns = gets
     if @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
       puts "#{@turns.chomp} turns it is."
-      get_guess(@turns)
+      get_guess(@turns.to_i)
     else
       puts 'Please try again'
       get_turns
@@ -107,45 +115,58 @@ class CodeBreaker
   end
 
   def get_guess(turns)
-    print "The colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
-    puts ' Type your guesses, pick the first letter of each color (e.g. "R" or "r" for red color)'
-    @guesses = []
-    colors = ['r','g','y','w','p','b']
+    @blacks = []
+    while turns >= 1 && @blacks.length < 4
+      print "\nThe colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
+      print " Remember there are no duplicates or blanks."
+      puts ' Type your guesses, pick the first letter of each color (e.g. "R" or "r" for red color)'
+      @guesses = []
+      colors = ['r','g','y','w','p','b']
 
-    while @guesses.length < 4
-        print "Enter one color guess then press enter: "
-        input = gets
-        if colors.include?(input.chomp.downcase)
-          case input.chomp.downcase
-          when 'r'
-            @guesses << RED
-          when 'g'
-            @guesses << GREEN
-          when 'y'
-            @guesses << YELLOW
-          when 'w'
-            @guesses << WHITE
-          when 'p'
-            @guesses << PINK
-          when 'b'
-            @guesses << BLUE
+      while @guesses.length < 4
+          print "Enter one color guess then press enter: "
+          input = gets
+          if colors.include?(input.chomp.downcase)
+            case input.chomp.downcase
+            when 'r'
+              @guesses << RED
+            when 'g'
+              @guesses << GREEN
+            when 'y'
+              @guesses << YELLOW
+            when 'w'
+              @guesses << WHITE
+            when 'p'
+              @guesses << PINK
+            when 'b'
+              @guesses << BLUE
+            end
+          else
+            puts 'Please try again'
           end
-        else
-          puts 'Please try again'
-        end
-    end
-    print 'Is this your choice of colors(enter "y" or "n"): '
-    @guesses.each do |guess|
-      print "#{guess} "
-    end
-    confirm = gets.chomp.downcase
-    unless confirm == 'y' || confirm == ''
-      get_guess(turns)
+      end
+      print 'Is this your choice of colors(enter "y" or "n"): '
+      @guesses.each do |guess|
+        print "#{guess} "
+      end
+      confirm = gets.chomp.downcase
+      unless confirm == 'y' || confirm == ''
+        get_guess(turns)
+      end
+      check_guess
+      turns -= 1
+      if turns > 0 && @blacks.length < 4
+        puts "\nAlmost got it, try again"
+      end
     end
 
-  end
-
-  def get_input
+    if @blacks.length > 3
+      print "Congrats, you won. The code was "
+      @codes.each { |code| print "#{code} " }
+    else
+      print 'You have run out of turns.There is always a next time. The code was '
+      @codes.each { |code| print "#{code} " }
+    end
 
   end
 
@@ -161,7 +182,7 @@ class Game
   private
 
   def display
-    print "Welcome to the Mastermind Game. Mastermind or Master Mind is a code-breaking game for two players"
+    print "\nWelcome to the Mastermind Game. Mastermind or Master Mind is a code-breaking game for two players"
     print "where there are: code pegs  of six different colors which only four will be chosen; and "
     print "key pegs, #{bold('black')} and #{bold('white')}, which are smaller than the code pegs; "
     puts "they will be placed in the small holes on the board. Google for more."
@@ -176,10 +197,11 @@ class Game
     elsif input == 'codecreator'
 
     else
+      puts "Sorry, didn't get that"
       display
     end
   end
 
 end
 
-CodeBreaker.new.start
+Game.new.start
