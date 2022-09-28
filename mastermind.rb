@@ -38,6 +38,7 @@ class CodeBreaker
   def start
     get_codes
     display
+    get_turns
   end
 
   private
@@ -48,9 +49,6 @@ class CodeBreaker
     print "codemaker provides feedback by placing from zero to four key pegs. A colored or #{bold('BLACK')} "
     print "key peg is placed for each code peg from the guess which is correct in both"
     puts " color and position. A #{bold('WHITE')} key peg indicates the existence of a correct color code peg placed in the wrong position."
-
-    get_turns
-
   end
 
   def get_codes
@@ -77,7 +75,6 @@ class CodeBreaker
   end
 
   def check_guess
-    puts @codes
     @blacks = []
     arr1 = {}
     @codes.each { |a| arr1.store(a,'') }
@@ -172,6 +169,22 @@ class CodeBreaker
 
 end
 
+class CodeCreator
+
+  def start
+    display
+  end
+
+  private
+
+  def display
+    print "The codemaker chooses a pattern of four code pegs. Players decide in advance whether duplicates and blanks are allowed."
+    print " If so, the codemaker may even choose four same-colored code pegs or four blanks. If blanks are not allowed in the code,"
+    print " the codebreaker may not use blanks in their guesses. Blanks and duplicates are not allowed in this case. "
+  end
+
+end
+
 class Game
   include Colors
 
@@ -195,7 +208,7 @@ class Game
     if input == 'codebreaker'
       CodeBreaker.new.start
     elsif input == 'codecreator'
-
+      CodeCreator.new.start
     else
       puts "Sorry, didn't get that"
       display
@@ -204,4 +217,4 @@ class Game
 
 end
 
-Game.new.start
+CodeCreator.new.start
