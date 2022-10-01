@@ -32,7 +32,50 @@ module Colors
 
 end
 
-class CodeBreaker
+class Game
+  include Colors
+
+  def start
+    display
+  end
+
+  private
+
+  def display
+    print "\nWelcome to the Mastermind Game. Mastermind or Master Mind is a code-breaking game for two players"
+    print "where there are: code pegs  of six different colors which only four will be chosen; and "
+    print "key pegs, #{bold('black')} and #{bold('white')}, which are smaller than the code pegs; "
+    puts "they will be placed in the small holes on the board. Google for more."
+    puts 'Enough with the chit chat, what would you like to be? The "Code Breaker" or "Code Creator"?'
+    get_input
+  end
+
+  def get_input
+    input = gets.split.join.downcase
+    if input == 'codebreaker'
+      CodeBreaker.new.start
+    elsif input == 'codecreator'
+      CodeCreator.new.start
+    else
+      puts "Sorry, didn't get that"
+      display
+    end
+  end
+
+  def get_turns
+    @turns = gets
+    unless @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
+      puts 'Please try again'
+      get_turns
+    else
+      puts "#{@turns.chomp} turns it is."
+      @turns
+    end
+  end
+
+end
+
+class CodeBreaker < Game
   include Colors
 
   def start
@@ -101,16 +144,7 @@ class CodeBreaker
     puts ''
   end
 
-  def get_turns
-    @turns = gets
-    unless @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
-      puts 'Please try again'
-      get_turns
-    else
-      puts "#{@turns.chomp} turns it is."
-      @turns
-    end
-  end
+
 
   def get_guess
     @blacks = []
@@ -171,7 +205,8 @@ class CodeBreaker
 
 end
 
-class CodeCreator < CodeBreaker
+
+class CodeCreator < Game
   include Colors
 
   def start
@@ -181,12 +216,41 @@ class CodeCreator < CodeBreaker
   private
 
   def display
-    print "The codemaker chooses a pattern of four code pegs. Players decide in advance whether duplicates and blanks are allowed."
+    print "\nThe codemaker chooses a pattern of four code pegs. Players decide in advance whether duplicates and blanks are allowed."
     print " If so, the codemaker may even choose four same-colored code pegs or four blanks. If blanks are not allowed in the code,"
     puts " the codebreaker may not use blanks in their guesses. Blanks and duplicates are not allowed in this case."
     puts "Enter the number of turns you would like the computer to guess the code (The number should be even and greater than eight and less than twelve)"
-    # puts "Enter the choice of colors you want the computer to guess"
     get_turns
+    get_codes
+  end
+
+  def get_codes
+    print "The colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
+    print " Remember there are no duplicates or blanks."
+    puts "Enter the choice of colors you want the computer to guess, pick the first letters of each color (e.g. 'RGBW' or 'rgbw' for red, green, blue and white)"
+    input = gets.chomp.downcase
+    if input.length < 4
+      puts 'Please try again'
+      get_codes
+    end
+    @codes = []
+    for i in (0..3) do
+      case input[i]
+      when 'r'
+        @codes << RED
+      when 'g'
+        @codes << GREEN
+      when 'y'
+        @codes << YELLOW
+      when 'w'
+        @codes << WHITE
+      when 'p'
+        @codes << PINK
+      when 'b'
+        @codes << BLUE
+      end
+    end
+    puts @codes
   end
 
   def get_set
@@ -206,36 +270,4 @@ class CodeCreator < CodeBreaker
 
 end
 
-class Game
-  include Colors
-
-  def start
-    display
-  end
-
-  private
-
-  def display
-    print "\nWelcome to the Mastermind Game. Mastermind or Master Mind is a code-breaking game for two players"
-    print "where there are: code pegs  of six different colors which only four will be chosen; and "
-    print "key pegs, #{bold('black')} and #{bold('white')}, which are smaller than the code pegs; "
-    puts "they will be placed in the small holes on the board. Google for more."
-    puts 'Enough with the chit chat, what would you like to be? The "Code Breaker" or "Code Creator"?'
-    get_input
-  end
-
-  def get_input
-    input = gets.split.join.downcase
-    if input == 'codebreaker'
-      CodeBreaker.new.start
-    elsif input == 'codecreator'
-      CodeCreator.new.start
-    else
-      puts "Sorry, didn't get that"
-      display
-    end
-  end
-
-end
-
-CodeCreator.new.start
+CodeBreaker.new.start
