@@ -180,7 +180,23 @@ class CodeCreator
   def display
     print "The codemaker chooses a pattern of four code pegs. Players decide in advance whether duplicates and blanks are allowed."
     print " If so, the codemaker may even choose four same-colored code pegs or four blanks. If blanks are not allowed in the code,"
-    print " the codebreaker may not use blanks in their guesses. Blanks and duplicates are not allowed in this case. "
+    puts " the codebreaker may not use blanks in their guesses. Blanks and duplicates are not allowed in this case."
+    get_set
+  end
+
+  def get_set
+    @set = []
+    for i in (1..6) do
+      for j in (1..6) do
+        for k in (1..6) do
+          for l in (1..6) do
+            a = i.to_s + j.to_s + k.to_s + l.to_s
+            @set << a
+          end
+        end
+      end
+    end
+    puts @set
   end
 
 end
