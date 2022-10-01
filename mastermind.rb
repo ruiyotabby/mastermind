@@ -38,7 +38,7 @@ class CodeBreaker
   def start
     get_codes
     display
-    get_turns
+    get_guess
   end
 
   private
@@ -49,6 +49,8 @@ class CodeBreaker
     print "codemaker provides feedback by placing from zero to four key pegs. A colored or #{bold('BLACK')} "
     print "key peg is placed for each code peg from the guess which is correct in both"
     puts " color and position. A #{bold('WHITE')} key peg indicates the existence of a correct color code peg placed in the wrong position."
+    puts "Enter the number of turns you would like to guess the code (The number should be even and greater than eight and less than twelve)"
+    get_turns
   end
 
   def get_codes
@@ -100,19 +102,19 @@ class CodeBreaker
   end
 
   def get_turns
-    puts "Enter the number of turns you would like to guess the code (The number should be even and greater than eight and less than twelve)"
     @turns = gets
-    if @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
-      puts "#{@turns.chomp} turns it is."
-      get_guess(@turns.to_i)
-    else
+    unless @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
       puts 'Please try again'
       get_turns
+    else
+      puts "#{@turns.chomp} turns it is."
+      @turns
     end
   end
 
-  def get_guess(turns)
+  def get_guess
     @blacks = []
+    turns = @turns.to_i
     while turns >= 1 && @blacks.length < 4
       print "\nThe colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
       print " Remember there are no duplicates or blanks."
@@ -148,7 +150,7 @@ class CodeBreaker
       end
       confirm = gets.chomp.downcase
       unless confirm == 'y' || confirm == ''
-        get_guess(turns)
+        get_guess
       end
       check_guess
       turns -= 1
@@ -169,7 +171,8 @@ class CodeBreaker
 
 end
 
-class CodeCreator
+class CodeCreator < CodeBreaker
+  include Colors
 
   def start
     display
@@ -181,7 +184,9 @@ class CodeCreator
     print "The codemaker chooses a pattern of four code pegs. Players decide in advance whether duplicates and blanks are allowed."
     print " If so, the codemaker may even choose four same-colored code pegs or four blanks. If blanks are not allowed in the code,"
     puts " the codebreaker may not use blanks in their guesses. Blanks and duplicates are not allowed in this case."
-    get_set
+    puts "Enter the number of turns you would like the computer to guess the code (The number should be even and greater than eight and less than twelve)"
+    # puts "Enter the choice of colors you want the computer to guess"
+    get_turns
   end
 
   def get_set
