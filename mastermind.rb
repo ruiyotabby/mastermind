@@ -64,12 +64,12 @@ class Game
 
   def get_turns
     @turns = gets
-    unless @turns.to_i % 2  == 0 && @turns.to_i >= 8 && @turns.to_i <= 12
-      puts 'Please try again'
-      get_turns
-    else
+    if @turns.to_i.even? && @turns.to_i >= 8 && @turns.to_i <= 12
       puts "#{@turns.chomp} turns it is."
       @turns
+    else
+      puts 'Please try again'
+      get_turns
     end
   end
 
@@ -98,7 +98,7 @@ class CodeBreaker < Game
 
   def get_codes
     @codes = []
-    for i in (1..4) do
+    4.times do
       case rand(1..6)
       when 1
         @codes << RED
@@ -114,37 +114,33 @@ class CodeBreaker < Game
         @codes << WHITE
       end
     end
-    if @codes.uniq.length < 4
-      get_codes
-    end
+    @codes
   end
 
   def check_guess
     @blacks = []
-    arr1 = {}
-    @codes.each { |a| arr1.store(a,'') }
-    arr2 = Hash.new
-    @guesses.each { |a| arr2.store(a,'') }
     print "\n\t"
-    arr1.each_with_index do |(key1,val1),indx1|
-      unless arr1[val1] == true || arr2[val1] == true
-        if arr1.keys.index(key1) == arr2.keys.index(key1)
-          print "#{B} "
-          arr1[key1] = true
-          arr2[key1] = true
-          @blacks << B
-        elsif arr1[key1] == arr2[key1]
-          print "#{W} "
-          arr1[key1] = true
-          arr2[key1] = true
-        end
-      end
+    wrong_guess = []
+    wrong_answer = []
+    peg_pairs = @guesses.zip(@codes)
 
+    peg_pairs.each do |guess_peg, answer_peg|
+      if guess_peg == answer_peg
+        print "#{B} "
+        @blacks << B
+      else
+        wrong_guess << guess_peg
+        wrong_answer << answer_peg
+      end
+    end
+    wrong_guess.each do |peg|
+      if wrong_answer.include?(peg)
+        print "#{W} "
+        wrong_answer.delete(peg)
+      end
     end
     puts ''
   end
-
-
 
   def get_guess
     @blacks = []
@@ -152,64 +148,60 @@ class CodeBreaker < Game
     while turns >= 1 && @blacks.length < 4
       print "\nThe colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
       print " Remember there are no duplicates or blanks."
-      puts ' Type your guesses, pick the first letter of each color (e.g. "R" or "r" for red color)'
+      puts "Enter your choice of colors, pick the first letters of each color (e.g. 'RGBW' or 'rgbw' for red, green, blue and white)"
+      input = gets.chomp.downcase
       @guesses = []
       colors = ['r','g','y','w','p','b']
 
-      while @guesses.length < 4
-          print "Enter one color guess then press enter: "
-          input = gets
-          if colors.include?(input.chomp.downcase)
-            case input.chomp.downcase
-            when 'r'
-              @guesses << RED
-            when 'g'
-              @guesses << GREEN
-            when 'y'
-              @guesses << YELLOW
-            when 'w'
-              @guesses << WHITE
-            when 'p'
-              @guesses << PINK
-            when 'b'
-              @guesses << BLUE
-            end
-          else
-            puts 'Please try again'
+      4.times do |i|
+        if colors.include?(input[i])
+          case input[i]
+          when 'r'
+            @guesses << RED
+          when 'g'
+            @guesses << GREEN
+          when 'y'
+            @guesses << YELLOW
+          when 'w'
+            @guesses << WHITE
+          when 'p'
+            @guesses << PINK
+          when 'b'
+            @guesses << BLUE
           end
+        else
+          puts 'Please try again'
+          get_guess
+        end
       end
       print 'Is this your choice of colors(enter "y" or "n"): '
       @guesses.each do |guess|
         print "#{guess} "
       end
       confirm = gets.chomp.downcase
-      unless confirm == 'y' || confirm == ''
-        get_guess
-      end
+      get_guess unless confirm.include?('y') || confirm == ''
+
       check_guess
       turns -= 1
-      if turns > 0 && @blacks.length < 4
-        puts "\nAlmost got it, try again"
-      end
+      puts "\n#{turns} turns remaining"
+      puts "\nAlmost got it, try again" if turns.positive? && @blacks.length < 4
+
     end
 
     if @blacks.length > 3
       print "Congrats, you won. The code was "
-      @codes.each { |code| print "#{code} " }
     else
       print 'You have run out of turns.There is always a next time. The code was '
-      @codes.each { |code| print "#{code} " }
     end
-
+    @codes.each { |code| print "#{code} " }
   end
-
 end
-
 
 class CodeCreator < Game
   include Colors
 
   def start
+    create_set
     display
   end
 
@@ -222,19 +214,61 @@ class CodeCreator < Game
     puts "Enter the number of turns you would like the computer to guess the code (The number should be even and greater than eight and less than twelve)"
     get_turns
     get_codes
+    show_code
+  end
+
+  def show_code
+    turns = @turns.to_i
+    while turns.positive?
+      print 'Your code is '
+      @codes.each do |code|
+        print "#{code} "
+      end
+      puts
+      puts "The computer\'s guess is #{guess_code}"
+    end
+  end
+
+  def guess_code
+    @rand_set = @set.sample
+    p @set.length
+    p @rand_set
+    input = gets.split.join.downcase
+    @impossible = []
+    while input
+      if input.empty?
+        @set.each { |el| @rand_set.split('').each { |num| @impossible << el if el.include?(num) } }
+        @impossible.uniq!
+        @impossible.each { |el| @set.delete(el) }
+        guess_code unless @set.length < 2
+      else
+        if input.length == 4
+
+          if input == 'bbbb'
+            puts "Computer won in #{@turns}"
+          else
+          end
+        end
+      end
+      guess_code unless @set.length < 2
+    end
   end
 
   def get_codes
-    print "The colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and #{YELLOW} Yellow."
-    print " Remember there are no duplicates or blanks."
-    puts "Enter the choice of colors you want the computer to guess, pick the first letters of each color (e.g. 'RGBW' or 'rgbw' for red, green, blue and white)"
+    print "The colors to be chosen from are; #{RED} Red #{BLUE} Blue #{WHITE} White #{PINK} Pink #{GREEN} Green and "
+    print "#{YELLOW} Yellow.\n Remember there are no duplicates or blanks."
+    print "Enter the choice of colors you want the computer to guess, pick the first letters of each color (e.g. 'RGBW'"
+    puts " or 'rgbw' for red, green, blue and white)"
     input = gets.chomp.downcase
+
     if input.length < 4
       puts 'Please try again'
       get_codes
     end
+
     @codes = []
-    for i in (0..3) do
+
+    4.times do |i|
       case input[i]
       when 'r'
         @codes << RED
@@ -248,26 +282,29 @@ class CodeCreator < Game
         @codes << PINK
       when 'b'
         @codes << BLUE
+      else
+        puts 'Try Again'
+        get_codes
       end
     end
-    puts @codes
+
+    print 'Is this your choice of colors(enter "y" or "n"): '
+    @codes.each do |code|
+      print "#{code} "
+    end
+    confirm = gets.chomp.downcase
+    get_codes unless confirm.include?('y') || confirm == ''
+
+    @codes
   end
 
-  def get_set
+  def create_set
     @set = []
-    for i in (1..6) do
-      for j in (1..6) do
-        for k in (1..6) do
-          for l in (1..6) do
-            a = i.to_s + j.to_s + k.to_s + l.to_s
-            @set << a
-          end
-        end
-      end
-    end
-    puts @set
+    colors = '123456'.chars
+    @set = colors.product(*[colors] * 3).map(&:join)
+    @set
   end
 
 end
 
-CodeBreaker.new.start
+CodeCreator.new.start
